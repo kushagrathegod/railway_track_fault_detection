@@ -69,7 +69,7 @@ const Dashboard = ({ defects }) => {
                                     step.trim() && <div key={i} className="resolution-step">{step}</div>
                                 ))
                             ) : (
-                                <p>Fetching Gemini recommendations...</p>
+                                <p>Fetching AI recommendations...</p>
                             )}
                         </div>
                     </div>

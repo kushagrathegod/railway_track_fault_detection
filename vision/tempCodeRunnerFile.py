@@ -1,7 +1,4 @@
 import cv2
-from dotenv import load_dotenv
-
-load_dotenv()
 import requests
 import time
 import os
@@ -10,9 +7,8 @@ import random
 from concurrent.futures import ThreadPoolExecutor
 
 # Configuration
-# Configuration
-MODEL_API_URL = os.getenv("MODEL_API_URL", "https://vishalbhagat01-railway.hf.space/predict")
-BACKEND_API_URL = os.getenv("BACKEND_API_URL", "http://localhost:8000/analyze")
+MODEL_API_URL = "https://vishalbhagat01-railway.hf.space/predict"
+BACKEND_API_URL = "http://localhost:8000/analyze"
 CONFIDENCE_THRESHOLD = 70.0  # Safety threshold
 CAMERA_SOURCE = 0 # 0 for webcam, or path to video file
 SAVE_DIR = "captured_defects"
@@ -90,10 +86,8 @@ def process_frame(frame):
             }
             
             # Using ThreadPool to not block the video loop significantly
-            response = requests.post(BACKEND_API_URL, json=payload)
-            print(f">>> Sent to backend analysis. Status: {response.status_code}")
-            if response.status_code != 200:
-                print(f"!!! Backend Error: {response.text}")
+            requests.post(BACKEND_API_URL, json=payload)
+            print(">>> Sent to backend analysis.")
             
     except Exception as e:
         print(f"Error processing frame: {e}")

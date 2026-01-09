@@ -23,7 +23,7 @@ class Defect(Base):
     chainage = Column(String, nullable=True) # KM/Chainage
     nearest_station = Column(String, nullable=True)
     
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=datetime.now)
     
     # Analysis results
     severity = Column(String, default="Pending") # Low, High, Critical

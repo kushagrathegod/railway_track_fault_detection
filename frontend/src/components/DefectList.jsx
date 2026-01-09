@@ -18,7 +18,7 @@ const DefectList = ({ defects, onSelect, selectedId }) => {
                             <span className="defect-confidence">{defect.confidence}%</span>
                         </div>
                         <div className="defect-info">📍 {defect.chainage} | {defect.nearest_station}</div>
-                        <div className="defect-info">⚠️ {defect.severity} | 🕒 {new Date(defect.timestamp).toLocaleTimeString()}</div>
+                        <div className="defect-info">⚠️ {defect.severity} | 🕒 {new Date(defect.timestamp).toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata" })}</div>
                     </div>
                 ))
             )}

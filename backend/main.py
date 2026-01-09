@@ -1,4 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
+from dotenv import load_dotenv
+
+load_dotenv()
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -6,7 +9,7 @@ from typing import Optional, List
 from datetime import datetime
 import database
 from database import Defect, SessionLocal
-import gemini_service
+import groq_service
 import email_service
 
 app = FastAPI(title="Railway Defect Detection System")
@@ -78,19 +81,26 @@ def normalize_severity(severity_str):
 async def analyze_defect(defect: DefectCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """
     Receives detection data from Vision System.
-    1. Calls Gemini for analysis.
+    1. Calls Groq for analysis.
     2. Saves to DB.
     3. Sends alert if Critical.
     """
     location_str = f"Lat: {defect.latitude}, Lon: {defect.longitude}, KM: {defect.chainage}, Station: {defect.nearest_station}"
     
-    # 1. Gemini Analysis
+    # 1. Groq Analysis
     print(f"Analyzing defect: {defect.defect_type} with confidence {defect.confidence}%")
-    analysis = gemini_service.analyze_defect(defect.defect_type, defect.confidence, location_str)
-    
+    # Offload blocking synchronous call to thread pool
+    import asyncio
+    try:
+        analysis = await asyncio.to_thread(groq_service.analyze_defect, defect.defect_type, defect.confidence, location_str)
+        print(f"DEBUG: Groq Analysis Result: {analysis}")
+    except Exception as e:
+        print(f"ERROR calling Groq Service: {e}")
+        analysis = {}
+
     # Normalize severity
     severity = normalize_severity(analysis.get("severity", "High"))
-    print(f"Severity determined: {severity}")
+    print(f"DEBUG: Severity determined: {severity}")
     
     # 2. Save to DB
     db_defect = Defect(
@@ -102,9 +112,9 @@ async def analyze_defect(defect: DefectCreate, background_tasks: BackgroundTasks
         chainage=defect.chainage,
         nearest_station=defect.nearest_station,
         severity=severity,
-        root_cause=analysis.get("root_cause", "Analysis pending"),
-        action_required=analysis.get("immediate_action", "Awaiting assessment"),
-        resolution_steps=analysis.get("resolution_steps", "Pending detailed analysis")
+        root_cause=str(analysis.get("root_cause", "Analysis pending")) if not isinstance(analysis.get("root_cause"), list) else "; ".join(analysis.get("root_cause")),
+        action_required=str(analysis.get("immediate_action", "Awaiting assessment")) if not isinstance(analysis.get("immediate_action"), list) else "; ".join(analysis.get("immediate_action")),
+        resolution_steps=str(analysis.get("resolution_steps", "Pending detailed analysis")) if not isinstance(analysis.get("resolution_steps"), list) else "; ".join(analysis.get("resolution_steps"))
     )
     db.add(db_defect)
     db.commit()

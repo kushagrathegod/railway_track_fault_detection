@@ -3,13 +3,13 @@
 ## System Architecture
 The system consists of three main components:
 1. **Vision Agent (Edge)**: Python script using OpenCV to capture video, interact with the ML Model API, and detect defects.
-2. **Backend (Server)**: FastAPI application that receives defect data, queries Gemini for analysis, logs to database, and uses SMTP for alerts.
+2. **Backend (Server)**: FastAPI application that receives defect data, queries Groq (Llama 3) for analysis, logs to database, and uses SMTP for alerts.
 3. **Frontend (Dashboard)**: React + Vite application with Leaflet maps to visualize defects in real-time.
 
 ## API Flow
 1. **Detection**: `vision_agent.py` captures a frame -> POST `https://vishalbhagat01-railway.hf.space/predict`.
 2. **Ingestion**: If defective, `vision_agent.py` -> POST `http://localhost:8000/analyze` (with location & confidence).
-3. **Reasoning**: Backend -> Gemini API (Reasoning & Resolution).
+3. **Reasoning**: Backend -> Groq API (Reasoning & Resolution).
 4. **Storage**: Backend -> SQLite `railway.db`.
 5. **Alerting**: Backend -> Gmail SMTP (if Critical).
 6. **Visualization**: Frontend -> GET `http://localhost:8000/defects`.
@@ -26,12 +26,12 @@ The system consists of three main components:
 ### Prerequisites
 - Python 3.9+
 - Node.js 18+
-- Gemini API Key
+- Groq API Key
 
 ### Environment Variables
 Create a `.env` file in `backend/` and `vision/` if needed:
 ```
-GEMINI_API_KEY=your_key_here
+GROQ_API_KEY=your_key_here
 EMAIL_USER=your_email@gmail.com
 EMAIL_PASS=your_app_password
 ALERT_RECIPIENT=recipient@example.com

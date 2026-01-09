@@ -77,7 +77,7 @@ const Reports = ({ defects }) => {
                                 <td style={{ padding: '15px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                                         <Clock size={14} color="#94a3b8" />
-                                        {new Date(defect.timestamp).toLocaleString()}
+                                        {new Date(defect.timestamp).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}
                                     </div>
                                 </td>
                                 <td style={{ padding: '15px', fontWeight: '600' }}>{defect.defect_type}</td>

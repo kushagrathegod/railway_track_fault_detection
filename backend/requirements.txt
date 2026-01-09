@@ -3,5 +3,5 @@ uvicorn
 requests
 python-dotenv
 pydantic
-google-generativeai
+groq
 sqlalchemy
