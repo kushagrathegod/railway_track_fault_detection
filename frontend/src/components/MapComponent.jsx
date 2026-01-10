@@ -65,7 +65,7 @@ const MapComponent = ({ defects, selectedDefect, onSelectDefect }) => {
                             <Popup className="custom-popup">
                                 <strong>{defect.defect_type}</strong><br />
                                 Severity: <span style={{ color: defect.severity === 'Critical' ? 'red' : 'black' }}>{defect.severity}</span> <br />
-                                {defect.chainage}
+                                {defect.nearest_station}
                             </Popup>
                         </Marker>
                     )
