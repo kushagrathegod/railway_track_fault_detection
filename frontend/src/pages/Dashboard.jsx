@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import MapComponent from '../components/MapComponent';
 import DefectList from '../components/DefectList';
 import { useAuth } from '../contexts/AuthContext';
-import { X, AlertTriangle, CheckCircle, Info, Activity, TrendingUp, MapPin, Clock } from 'lucide-react';
+import { X, AlertTriangle, CheckCircle, Info, Activity, TrendingUp, MapPin, Clock, Play } from 'lucide-react';
 
 const API_URL = "http://localhost:8000";
 
@@ -68,123 +69,143 @@ const Dashboard = ({ defects }) => {
             <div style={{
                 padding: '20px 30px',
                 background: 'rgba(13, 13, 20, 0.6)',
-                borderBottom: '1px solid rgba(99, 102, 241, 0.2)'
+                borderBottom: '1px solid rgba(99, 102, 241, 0.2)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
             }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
-                    {/* Total Defects */}
-                    <div style={{
-                        background: 'rgba(19, 19, 26, 0.8)',
-                        backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(99, 102, 241, 0.2)',
-                        borderRadius: '12px',
-                        padding: '20px',
-                        transition: 'all 0.3s ease'
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
-                            <div style={{
-                                padding: '10px',
-                                background: 'rgba(99, 102, 241, 0.15)',
-                                borderRadius: '10px',
-                                border: '1px solid rgba(99, 102, 241, 0.3)'
-                            }}>
-                                <Activity size={20} color="#8b5cf6" />
+                <div style={{ flex: 1 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+                        {/* Total Defects */}
+                        <div style={{
+                            background: 'rgba(19, 19, 26, 0.8)',
+                            backdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(99, 102, 241, 0.2)',
+                            borderRadius: '12px',
+                            padding: '20px',
+                            transition: 'all 0.3s ease'
+                        }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
+                                <div style={{
+                                    padding: '10px',
+                                    background: 'rgba(99, 102, 241, 0.15)',
+                                    borderRadius: '10px',
+                                    border: '1px solid rgba(99, 102, 241, 0.3)'
+                                }}>
+                                    <Activity size={20} color="#8b5cf6" />
+                                </div>
+                            </div>
+                            <div style={{ fontSize: '2rem', fontWeight: 700, fontFamily: 'Outfit, sans-serif', marginBottom: '4px' }}>
+                                {totalDefects}
+                            </div>
+                            <div style={{ fontSize: '0.85rem', color: '#8b8d98', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                Total Defects
                             </div>
                         </div>
-                        <div style={{ fontSize: '2rem', fontWeight: 700, fontFamily: 'Outfit, sans-serif', marginBottom: '4px' }}>
-                            {totalDefects}
-                        </div>
-                        <div style={{ fontSize: '0.85rem', color: '#8b8d98', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                            Total Defects
-                        </div>
-                    </div>
 
-                    {/* Open Defects */}
-                    <div style={{
-                        background: 'rgba(19, 19, 26, 0.8)',
-                        backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(251, 191, 36, 0.2)',
-                        borderRadius: '12px',
-                        padding: '20px',
-                        transition: 'all 0.3s ease'
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
-                            <div style={{
-                                padding: '10px',
-                                background: 'rgba(251, 191, 36, 0.15)',
-                                borderRadius: '10px',
-                                border: '1px solid rgba(251, 191, 36, 0.3)'
-                            }}>
-                                <Clock size={20} color="#fbbf24" />
+                        {/* Open Defects */}
+                        <div style={{
+                            background: 'rgba(19, 19, 26, 0.8)',
+                            backdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(251, 191, 36, 0.2)',
+                            borderRadius: '12px',
+                            padding: '20px',
+                            transition: 'all 0.3s ease'
+                        }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
+                                <div style={{
+                                    padding: '10px',
+                                    background: 'rgba(251, 191, 36, 0.15)',
+                                    borderRadius: '10px',
+                                    border: '1px solid rgba(251, 191, 36, 0.3)'
+                                }}>
+                                    <Clock size={20} color="#fbbf24" />
+                                </div>
+                            </div>
+                            <div style={{ fontSize: '2rem', fontWeight: 700, fontFamily: 'Outfit, sans-serif', marginBottom: '4px' }}>
+                                {openDefects}
+                            </div>
+                            <div style={{ fontSize: '0.85rem', color: '#8b8d98', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                Open Defects
                             </div>
                         </div>
-                        <div style={{ fontSize: '2rem', fontWeight: 700, fontFamily: 'Outfit, sans-serif', marginBottom: '4px' }}>
-                            {openDefects}
-                        </div>
-                        <div style={{ fontSize: '0.85rem', color: '#8b8d98', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                            Open Defects
-                        </div>
-                    </div>
 
-                    {/* Critical Defects */}
-                    <div style={{
-                        background: 'rgba(19, 19, 26, 0.8)',
-                        backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(239, 68, 68, 0.2)',
-                        borderRadius: '12px',
-                        padding: '20px',
-                        transition: 'all 0.3s ease'
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
-                            <div style={{
-                                padding: '10px',
-                                background: 'rgba(239, 68, 68, 0.15)',
-                                borderRadius: '10px',
-                                border: '1px solid rgba(239, 68, 68, 0.3)'
-                            }}>
-                                <AlertTriangle size={20} color="#ef4444" />
+                        {/* Critical Defects */}
+                        <div style={{
+                            background: 'rgba(19, 19, 26, 0.8)',
+                            backdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(239, 68, 68, 0.2)',
+                            borderRadius: '12px',
+                            padding: '20px',
+                            transition: 'all 0.3s ease'
+                        }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
+                                <div style={{
+                                    padding: '10px',
+                                    background: 'rgba(239, 68, 68, 0.15)',
+                                    borderRadius: '10px',
+                                    border: '1px solid rgba(239, 68, 68, 0.3)'
+                                }}>
+                                    <AlertTriangle size={20} color="#ef4444" />
+                                </div>
+                            </div>
+                            <div style={{ fontSize: '2rem', fontWeight: 700, fontFamily: 'Outfit, sans-serif', marginBottom: '4px' }}>
+                                {criticalDefects}
+                            </div>
+                            <div style={{ fontSize: '0.85rem', color: '#8b8d98', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                Critical Open
                             </div>
                         </div>
-                        <div style={{ fontSize: '2rem', fontWeight: 700, fontFamily: 'Outfit, sans-serif', marginBottom: '4px' }}>
-                            {criticalDefects}
-                        </div>
-                        <div style={{ fontSize: '0.85rem', color: '#8b8d98', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                            Critical Open
-                        </div>
-                    </div>
 
-                    {/* Resolved Defects */}
-                    <div style={{
-                        background: 'rgba(19, 19, 26, 0.8)',
-                        backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(16, 185, 129, 0.2)',
-                        borderRadius: '12px',
-                        padding: '20px',
-                        transition: 'all 0.3s ease'
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
-                            <div style={{
-                                padding: '10px',
-                                background: 'rgba(16, 185, 129, 0.15)',
-                                borderRadius: '10px',
-                                border: '1px solid rgba(16, 185, 129, 0.3)'
-                            }}>
-                                <CheckCircle size={20} color="#10b981" />
+                        {/* Resolved Defects */}
+                        <div style={{
+                            background: 'rgba(19, 19, 26, 0.8)',
+                            backdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(16, 185, 129, 0.2)',
+                            borderRadius: '12px',
+                            padding: '20px',
+                            transition: 'all 0.3s ease'
+                        }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
+                                <div style={{
+                                    padding: '10px',
+                                    background: 'rgba(16, 185, 129, 0.15)',
+                                    borderRadius: '10px',
+                                    border: '1px solid rgba(16, 185, 129, 0.3)'
+                                }}>
+                                    <CheckCircle size={20} color="#10b981" />
+                                </div>
                             </div>
-                        </div>
-                        <div style={{ fontSize: '2rem', fontWeight: 700, fontFamily: 'Outfit, sans-serif', marginBottom: '4px' }}>
-                            {resolvedDefects}
-                        </div>
-                        <div style={{ fontSize: '0.85rem', color: '#8b8d98', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                            Resolved
+                            <div style={{ fontSize: '2rem', fontWeight: 700, fontFamily: 'Outfit, sans-serif', marginBottom: '4px' }}>
+                                {resolvedDefects}
+                            </div>
+                            <div style={{ fontSize: '0.85rem', color: '#8b8d98', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                Resolved
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Main Content: Sidebar + Map */}
-            <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+            <div style={{
+                display: 'flex',
+                flex: 1,
+                overflow: 'hidden',
+                padding: '20px',
+                gap: '20px',
+                background: 'rgba(10, 10, 15, 0.4)'
+            }}>
                 {/* Sidebar */}
-                <div className="sidebar">
+                <div className="sidebar" style={{
+                    width: '380px',
+                    height: '100%',
+                    background: 'rgba(19, 19, 26, 0.8)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(99, 102, 241, 0.2)',
+                    borderRadius: '16px',
+                    overflow: 'hidden'
+                }}>
                     <DefectList
                         defects={defects}
                         onSelect={setSelectedDefect}
@@ -192,8 +213,18 @@ const Dashboard = ({ defects }) => {
                     />
                 </div>
 
-                {/* Map Area - Smaller */}
-                <div style={{ flex: 1, height: '100%', position: 'relative' }}>
+                {/* Map Area - Polished Container */}
+                <div style={{
+                    flex: 1,
+                    height: '100%',
+                    position: 'relative',
+                    background: 'rgba(19, 19, 26, 0.8)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(99, 102, 241, 0.3)',
+                    borderRadius: '16px',
+                    overflow: 'hidden',
+                    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)'
+                }}>
                     <MapComponent
                         defects={defects}
                         selectedDefect={selectedDefect}

@@ -110,6 +110,8 @@ class StationCreate(BaseModel):
     latitude: float
     longitude: float
     station_master_email: str
+    station_master_username: str
+    station_master_password: str
 
 class StationUpdate(BaseModel):
     name: Optional[str] = None
@@ -606,6 +608,17 @@ def create_station(
     if not (-180 <= station.longitude <= 180):
         raise HTTPException(status_code=400, detail="Longitude must be between -180 and 180")
     
+    # Check if user with same username or email already exists
+    existing_user = db.query(User).filter(
+        (User.username == station.station_master_username) | 
+        (User.email == station.station_master_email)
+    ).first()
+    if existing_user:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"User with username '{station.station_master_username}' or email '{station.station_master_email}' already exists"
+        )
+
     # Create new station
     db_station = Station(
         name=station.name,
@@ -617,6 +630,17 @@ def create_station(
     db.add(db_station)
     db.commit()
     db.refresh(db_station)
+    
+    # Create corresponding Station Master user
+    db_user = User(
+        username=station.station_master_username,
+        email=station.station_master_email,
+        hashed_password=auth.get_password_hash(station.station_master_password),
+        role="StationMaster",
+        station_id=db_station.id
+    )
+    db.add(db_user)
+    db.commit()
     
     return db_station
 
@@ -690,13 +714,9 @@ def delete_station(
             detail=f"Cannot delete station with {assigned_defects} assigned defects. Please reassign or delete them first."
         )
     
-    # Check if station has users
-    station_users = db.query(User).filter(User.station_id == station_id).count()
-    if station_users > 0:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Cannot delete station with {station_users} assigned users. Please reassign or delete them first."
-        )
+    # Delete associated users
+    db.query(User).filter(User.station_id == station_id).delete()
+    db.commit()
     
     db.delete(db_station)
     db.commit()

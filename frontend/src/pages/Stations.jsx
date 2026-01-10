@@ -14,13 +14,14 @@ const Stations = () => {
     const [success, setSuccess] = useState('');
     const { token } = useAuth();
 
-    // Form state
     const [formData, setFormData] = useState({
         name: '',
         code: '',
         latitude: '',
         longitude: '',
-        station_master_email: ''
+        station_master_email: '',
+        station_master_username: '',
+        station_master_password: ''
     });
 
     // Fetch stations
@@ -55,7 +56,9 @@ const Stations = () => {
             code: '',
             latitude: '',
             longitude: '',
-            station_master_email: ''
+            station_master_email: '',
+            station_master_username: '',
+            station_master_password: ''
         });
         setShowAddForm(false);
         setEditingStation(null);
@@ -85,7 +88,9 @@ const Stations = () => {
                 code: formData.code,
                 latitude: parseFloat(formData.latitude),
                 longitude: parseFloat(formData.longitude),
-                station_master_email: formData.station_master_email
+                station_master_email: formData.station_master_email,
+                station_master_username: formData.station_master_username,
+                station_master_password: formData.station_master_password
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -392,30 +397,84 @@ const Stations = () => {
                                     }}
                                 />
                             </div>
+
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: 600, color: '#c8cad3' }}>
+                                    Station Master Email *
+                                </label>
+                                <input
+                                    type="email"
+                                    name="station_master_email"
+                                    value={formData.station_master_email}
+                                    onChange={handleInputChange}
+                                    required
+                                    placeholder="e.g., stationmaster@railway.com"
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px 16px',
+                                        background: 'rgba(10, 10, 15, 0.6)',
+                                        border: '1px solid rgba(99, 102, 241, 0.2)',
+                                        borderRadius: '10px',
+                                        color: 'white',
+                                        fontSize: '1rem',
+                                        fontFamily: 'Space Grotesk, sans-serif'
+                                    }}
+                                />
+                            </div>
                         </div>
 
-                        <div style={{ marginBottom: '24px' }}>
-                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: 600, color: '#c8cad3' }}>
-                                Station Master Email *
-                            </label>
-                            <input
-                                type="email"
-                                name="station_master_email"
-                                value={formData.station_master_email}
-                                onChange={handleInputChange}
-                                required
-                                placeholder="e.g., stationmaster@railway.com"
-                                style={{
-                                    width: '100%',
-                                    padding: '12px 16px',
-                                    background: 'rgba(10, 10, 15, 0.6)',
-                                    border: '1px solid rgba(99, 102, 241, 0.2)',
-                                    borderRadius: '10px',
-                                    color: 'white',
-                                    fontSize: '1rem',
-                                    fontFamily: 'Space Grotesk, sans-serif'
-                                }}
-                            />
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: 600, color: '#c8cad3' }}>
+                                    Master Login Username *
+                                </label>
+                                <input
+                                    type="text"
+                                    name="station_master_username"
+                                    value={formData.station_master_username}
+                                    onChange={handleInputChange}
+                                    required={!editingStation}
+                                    disabled={editingStation}
+                                    placeholder="e.g., ndls_admin"
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px 16px',
+                                        background: editingStation ? 'rgba(255, 255, 255, 0.05)' : 'rgba(10, 10, 15, 0.6)',
+                                        border: '1px solid rgba(99, 102, 241, 0.2)',
+                                        borderRadius: '10px',
+                                        color: 'white',
+                                        fontSize: '1rem',
+                                        fontFamily: 'Space Grotesk, sans-serif'
+                                    }}
+                                />
+                                {editingStation && <p style={{ fontSize: '0.75rem', color: '#8b8d98', marginTop: '4px' }}>Username cannot be changed</p>}
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: 600, color: '#c8cad3' }}>
+                                    Master Login Password *
+                                </label>
+                                <input
+                                    type="password"
+                                    name="station_master_password"
+                                    value={formData.station_master_password}
+                                    onChange={handleInputChange}
+                                    required={!editingStation}
+                                    disabled={editingStation}
+                                    placeholder="Enter secure password"
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px 16px',
+                                        background: editingStation ? 'rgba(255, 255, 255, 0.05)' : 'rgba(10, 10, 15, 0.6)',
+                                        border: '1px solid rgba(99, 102, 241, 0.2)',
+                                        borderRadius: '10px',
+                                        color: 'white',
+                                        fontSize: '1rem',
+                                        fontFamily: 'Space Grotesk, sans-serif'
+                                    }}
+                                />
+                                {editingStation && <p style={{ fontSize: '0.75rem', color: '#8b8d98', marginTop: '4px' }}>Use User Management to change passwords</p>}
+                            </div>
                         </div>
 
                         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>

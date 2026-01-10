@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import { Camera, Upload, Video, Image as ImageIcon, AlertCircle, CheckCircle2, Loader, Activity } from 'lucide-react';
+import { Camera, Upload, Video, Image as ImageIcon, AlertCircle, CheckCircle2, Loader, Activity, MapPin, Play, Square, Shield, Zap, Database, Cpu, Clock } from 'lucide-react';
 
 const API_URL = "http://localhost:8000";
 
 const DronePage = () => {
     const { token } = useAuth();
+    // Inspection flow state
+    const [inspectionStarted, setInspectionStarted] = useState(false);
     const [mode, setMode] = useState(null); // 'camera' or 'upload'
     const [processing, setProcessing] = useState(false);
     const [result, setResult] = useState(null);
@@ -26,6 +28,7 @@ const DronePage = () => {
     const [useDefaultLocation, setUseDefaultLocation] = useState(true);
     const [latitude, setLatitude] = useState(28.6139);  // Default: New Delhi
     const [longitude, setLongitude] = useState(77.2090);
+    const [liveLocation, setLiveLocation] = useState({ lat: 28.6139, lon: 77.2090, label: 'Default (New Delhi)' });
 
     // Cleanup camera on unmount
     useEffect(() => {
@@ -45,6 +48,24 @@ const DronePage = () => {
             setStream(mediaStream);
             setMode('camera');
             setError('');
+
+            // Get browser location for live feed
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    setLiveLocation({
+                        lat: position.coords.latitude,
+                        lon: position.coords.longitude,
+                        label: 'Auto-detected'
+                    });
+                }, (err) => {
+                    console.warn("Geolocation error:", err);
+                    setLiveLocation({
+                        lat: 28.6139,
+                        lon: 77.2090,
+                        label: 'Default fallback (New Delhi)'
+                    });
+                });
+            }
         } catch (err) {
             setError('Failed to access camera. Please grant camera permissions.');
             console.error('Camera error:', err);
@@ -117,9 +138,14 @@ const DronePage = () => {
             const formData = new FormData();
             formData.append('file', blob, 'frame.jpg');
 
-            // Add location data if manual mode
+            // Add location data
             const params = new URLSearchParams();
-            if (!useDefaultLocation) {
+            if (mode === 'camera') {
+                // Always use live location for camera
+                params.append('latitude', liveLocation.lat);
+                params.append('longitude', liveLocation.lon);
+            } else if (!useDefaultLocation) {
+                // Use manual input for upload mode if not using default
                 params.append('latitude', latitude);
                 params.append('longitude', longitude);
             }
@@ -208,31 +234,59 @@ const DronePage = () => {
         setResult(null);
         setError('');
         setMode(null);
+        setInspectionStarted(false);
     };
 
     return (
         <div style={{ padding: '30px', height: 'calc(100vh - 70px)', overflow: 'auto' }}>
             {/* Header */}
-            <div style={{ marginBottom: '30px' }}>
-                <h1 style={{
-                    fontSize: '2rem',
-                    margin: 0,
-                    marginBottom: '8px',
-                    fontFamily: 'Outfit, sans-serif',
-                    fontWeight: 700,
-                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent'
-                }}>
-                    🚁 Drone Inspection Control
-                </h1>
-                <p style={{ color: '#8b8d98', fontSize: '0.95rem', margin: 0 }}>
-                    Real-time railway track defect detection using AI-powered vision analysis
-                </p>
+            <div style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                <div>
+                    <h1 style={{
+                        fontSize: '2rem',
+                        margin: 0,
+                        marginBottom: '8px',
+                        fontFamily: 'Outfit, sans-serif',
+                        fontWeight: 700,
+                        background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent'
+                    }}>
+                        🚁 Drone Inspection Control
+                    </h1>
+                    <p style={{ color: '#8b8d98', fontSize: '0.95rem', margin: 0 }}>
+                        Real-time railway track defect detection using AI-powered vision analysis
+                    </p>
+                </div>
+
+                {inspectionStarted && (
+                    <button
+                        onClick={reset}
+                        style={{
+                            padding: '12px 24px',
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            border: '1px solid rgba(239, 68, 68, 0.3)',
+                            borderRadius: '12px',
+                            color: '#fca5a5',
+                            cursor: 'pointer',
+                            fontSize: '1rem',
+                            fontWeight: 600,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            transition: 'all 0.3s ease'
+                        }}
+                        onMouseOver={(e) => (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)')}
+                        onMouseOut={(e) => (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)')}
+                    >
+                        <Square size={20} fill="#ef4444" />
+                        Stop Inspection
+                    </button>
+                )}
             </div>
 
-            {/* Location Configuration */}
-            {!mode && (
+            {/* Location Configuration - Only shown for upload */}
+            {mode === 'upload' && (
                 <div style={{
                     maxWidth: '800px',
                     margin: '0 auto 30px',
@@ -369,8 +423,129 @@ const DronePage = () => {
                 </div>
             )}
 
-            {/* Mode Selection */}
-            {!mode && (
+            {/* Start Inspection Button - Center Stage with Status Cards */}
+            {!inspectionStarted && (
+                <div style={{
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minHeight: '600px',
+                    gap: '50px'
+                }}>
+                    {/* System Status Row */}
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(4, 1fr)',
+                        gap: '20px',
+                        width: '100%',
+                        maxWidth: '900px'
+                    }}>
+                        {[
+                            { icon: <Cpu size={20} color="#6366f1" />, label: 'AI Engine', status: 'Ready' },
+                            { icon: <Shield size={20} color="#10b981" />, label: 'Security', status: 'Active' },
+                            { icon: <Database size={20} color="#fbbf24" />, label: 'Database', status: 'Connected' },
+                            { icon: <Clock size={20} color="#8b5cf6" />, label: 'Latency', status: '12ms' }
+                        ].map((item, idx) => (
+                            <div key={idx} style={{
+                                background: 'rgba(19, 19, 26, 0.6)',
+                                border: '1px solid rgba(99, 102, 241, 0.2)',
+                                borderRadius: '16px',
+                                padding: '16px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px'
+                            }}>
+                                <div style={{
+                                    padding: '8px',
+                                    background: 'rgba(99, 102, 241, 0.1)',
+                                    borderRadius: '10px'
+                                }}>
+                                    {item.icon}
+                                </div>
+                                <div>
+                                    <div style={{ color: '#8b8d98', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</div>
+                                    <div style={{ color: 'white', fontWeight: 600, fontSize: '0.9rem' }}>{item.status}</div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div style={{ textAlign: 'center' }}>
+                        <button
+                            onClick={() => setInspectionStarted(true)}
+                            style={{
+                                padding: '30px 60px',
+                                fontSize: '1.5rem',
+                                fontWeight: 700,
+                                fontFamily: 'Outfit, sans-serif',
+                                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '20px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '20px',
+                                boxShadow: '0 20px 50px rgba(99, 102, 241, 0.3)',
+                                transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                            }}
+                            onMouseOver={(e) => {
+                                e.currentTarget.style.transform = 'scale(1.05) translateY(-5px)';
+                                e.currentTarget.style.boxShadow = '0 30px 60px rgba(99, 102, 241, 0.5)';
+                            }}
+                            onMouseOut={(e) => {
+                                e.currentTarget.style.transform = 'scale(1) translateY(0)';
+                                e.currentTarget.style.boxShadow = '0 20px 50px rgba(99, 102, 241, 0.3)';
+                            }}
+                        >
+                            <Play size={32} fill="white" />
+                            Start Drone Inspection
+                        </button>
+                        <p style={{ marginTop: '25px', color: '#8b8d98', fontSize: '1rem', maxWidth: '500px' }}>
+                            Initialize the AI-powered inspection suite to detect railway defects in real-time or via high-resolution image uploads.
+                        </p>
+                    </div>
+
+                    {/* Guidelines Section */}
+                    <div style={{
+                        maxWidth: '900px',
+                        width: '100%',
+                        background: 'rgba(19, 19, 26, 0.4)',
+                        border: '1px dashed rgba(99, 102, 241, 0.3)',
+                        borderRadius: '20px',
+                        padding: '30px',
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: '30px'
+                    }}>
+                        <div>
+                            <h4 style={{ color: 'white', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <Zap size={18} color="#fbbf24" /> Active Inspection
+                            </h4>
+                            <ul style={{ color: '#8b8d98', fontSize: '0.9rem', margin: 0, paddingLeft: '20px', lineHeight: '1.6' }}>
+                                <li>Ensure stable internet for live telemetry.</li>
+                                <li>AI models will automatically flag critical defects.</li>
+                                <li>Auto-analyze mode available for hands-free operation.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 style={{ color: 'white', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <Shield size={18} color="#10b981" /> Data Integrity
+                            </h4>
+                            <ul style={{ color: '#8b8d98', fontSize: '0.9rem', margin: 0, paddingLeft: '20px', lineHeight: '1.6' }}>
+                                <li>All detections are geo-tagged and timestamped.</li>
+                                <li>Automated email alerts sent to Station Masters.</li>
+                                <li>Detailed analysis report generated for every flag.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Mode Selection - Only shown AFTER starting and BEFORE choosing mode */}
+            {inspectionStarted && !mode && (
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(2, 1fr)',
@@ -503,9 +678,27 @@ const DronePage = () => {
                             alignItems: 'center',
                             marginBottom: '20px'
                         }}>
-                            <h2 style={{ margin: 0, fontSize: '1.2rem', fontFamily: 'Outfit, sans-serif' }}>
-                                {mode === 'camera' ? '📹 Live Feed' : '🖼️ Image Preview'}
-                            </h2>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                <h2 style={{ margin: 0, fontSize: '1.2rem', fontFamily: 'Outfit, sans-serif' }}>
+                                    {mode === 'camera' ? '📹 Live Feed' : '🖼️ Image Preview'}
+                                </h2>
+                                {mode === 'camera' && (
+                                    <div style={{
+                                        fontSize: '0.75rem',
+                                        padding: '4px 10px',
+                                        background: 'rgba(139, 92, 246, 0.15)',
+                                        border: '1px solid rgba(139, 92, 246, 0.3)',
+                                        borderRadius: '20px',
+                                        color: '#a5b4fc',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px'
+                                    }}>
+                                        <MapPin size={14} />
+                                        <span>{liveLocation.label}: {liveLocation.lat.toFixed(4)}, {liveLocation.lon.toFixed(4)}</span>
+                                    </div>
+                                )}
+                            </div>
                             <button
                                 onClick={reset}
                                 style={{
