@@ -511,7 +511,7 @@ const DronePage = () => {
                                         objectFit: 'cover'
                                     }}
                                 >
-                                    <source src="/drone_shot1.mp4" type="video/mp4" />
+                                    <source src="/drone_shot3.mp4" type="video/mp4" />
                                 </video>
                                 {/* Mini Overlay Elements */}
                                 <div style={{ position: 'absolute', top: 5, left: 5, borderTop: '1px solid var(--accent-blue)', borderLeft: '1px solid var(--accent-blue)', width: 10, height: 10 }}></div>
