@@ -33,8 +33,3 @@ Thumbs.db
 # IDEs
 .vscode/
 .idea/
-
-# Media
-*.mp4
-/frontend/dist/*.mp4
-/frontend/public/*.mp4
