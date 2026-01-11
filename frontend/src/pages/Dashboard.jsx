@@ -6,7 +6,7 @@ import DefectList from '../components/DefectList';
 import { useAuth } from '../contexts/AuthContext';
 import { X, AlertTriangle, CheckCircle, Info, Activity, TrendingUp, MapPin, Clock, Play, Terminal, ShieldAlert } from 'lucide-react';
 
-const API_URL = "http://localhost:8000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const Dashboard = ({ defects }) => {
     const [selectedDefect, setSelectedDefect] = useState(null);
@@ -400,7 +400,7 @@ const Dashboard = ({ defects }) => {
                             }}>
                                 {selectedDefect.image_url ? (
                                     <img
-                                        src={`http://localhost:8000${selectedDefect.image_url}`}
+                                        src={`${API_URL}${selectedDefect.image_url}`}
                                         alt="Defect"
                                         style={{
                                             width: '100%',
