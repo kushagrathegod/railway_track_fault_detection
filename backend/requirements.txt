@@ -10,3 +10,4 @@ python-jose[cryptography]
 python-multipart
 openpyxl
 opencv-python
+pytz
