@@ -11,3 +11,4 @@ python-multipart
 openpyxl
 opencv-python
 pytz
+psycopg2-binary
