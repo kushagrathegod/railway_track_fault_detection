@@ -131,19 +131,32 @@ def send_alert(defect_data, recipient_email=None, station_name=None):
     
     # Attach image if file exists
     image_path = defect_data.get('image_url')
-    if image_path and os.path.exists(image_path):
+    physical_path = None
+    
+    if image_path:
+        # 1. Check if it's already an absolute path that exists
+        if os.path.exists(image_path):
+            physical_path = image_path
+        # 2. Check if it's a relative URL path (starts with /uploads/)
+        elif image_path.startswith('/uploads/'):
+            filename = os.path.basename(image_path)
+            # Find the backend/uploads directory relative to this service file
+            backend_dir = os.path.dirname(os.path.abspath(__file__))
+            physical_path = os.path.join(backend_dir, 'uploads', filename)
+    
+    if physical_path and os.path.exists(physical_path):
         try:
-            with open(image_path, 'rb') as img_file:
+            with open(physical_path, 'rb') as img_file:
                 img_data = img_file.read()
                 image = MIMEImage(img_data)
                 image.add_header('Content-ID', '<defect_image>')
-                image.add_header('Content-Disposition', 'inline', filename=os.path.basename(image_path))
+                image.add_header('Content-Disposition', 'inline', filename=os.path.basename(physical_path))
                 msg.attach(image)
-            print(f"✓ Image attached: {os.path.basename(image_path)}")
+            print(f"✓ Image attached: {os.path.basename(physical_path)}")
         except Exception as e:
-            print(f"⚠ Could not attach image: {e}")
+            print(f"⚠ Could not attach image from {physical_path}: {e}")
     else:
-        print(f"⚠ Image file not found: {image_path}")
+        print(f"⚠ Image file not found or invalid: {image_path} (Resolved to: {physical_path})")
 
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
