@@ -159,7 +159,8 @@ def send_alert(defect_data, recipient_email=None, station_name=None):
         print(f"⚠ Image file not found or invalid: {image_path} (Resolved to: {physical_path})")
 
     try:
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 587) as smtp:
+            smtp.starttls()
             smtp.login(sender_email, sender_password)
             smtp.send_message(msg)
         print(f"✓ Alert email sent successfully to {recipient_email}")
