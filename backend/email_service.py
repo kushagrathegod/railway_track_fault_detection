@@ -1,4 +1,5 @@
 import smtplib
+import socket
 from email.message import EmailMessage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -159,11 +160,20 @@ def send_alert(defect_data, recipient_email=None, station_name=None):
         print(f"⚠ Image file not found or invalid: {image_path} (Resolved to: {physical_path})")
 
     try:
-        with smtplib.SMTP_SSL('smtp.gmail.com', 587) as smtp:
-            smtp.starttls()
+        print(f"Attempting to send email to {recipient_email}...")
+        with smtplib.SMTP('smtp.gmail.com', 587, timeout=20) as smtp:
+            smtp.ehlo()  
+            smtp.starttls()  
+            smtp.ehlo()  
+            
             smtp.login(sender_email, sender_password)
             smtp.send_message(msg)
+            
         print(f"✓ Alert email sent successfully to {recipient_email}")
+    except socket.gaierror:
+        print("✗ DNS Error: Could not resolve smtp.gmail.com")
+    except smtplib.SMTPAuthenticationError:
+        print("✗ Login Error: Check if your App Password is correct")
     except Exception as e:
         print(f"✗ Failed to send email: {e}")
 
